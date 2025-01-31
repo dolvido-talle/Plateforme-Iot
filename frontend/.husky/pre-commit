@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+echo "🚨 Hook pre-commit déclenché !"
+node check-errors.js
+
