@@ -25,7 +25,7 @@ image: node:lts
 
 cache:
   paths:
-    - node_modules/
+    - frontend/node_modules/
 
 before_script: # ➜ Ajout global avant chaque job
   - ls -la # Vérifie que tous les fichiers sont bien présents
