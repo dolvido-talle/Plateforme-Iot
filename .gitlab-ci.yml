@@ -27,12 +27,16 @@ cache:
   paths:
     - node_modules/
 
+before_script: # ➜ Ajout global avant chaque job
+  - git fetch --unshallow || true # Récupère l'historique Git si nécessaire
+  - ls -la # Vérifie que tous les fichiers sont bien présents
+
 build-job: # This job runs in the build stage.
   stage: build
   script:
     - npm install
     - npm run build
-    - mv dist public # GitLab Pages attend un dossier "public"
+    - mv build public
   artifacts:
     paths:
       - public
