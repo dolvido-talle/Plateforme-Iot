@@ -28,12 +28,12 @@ cache:
     - node_modules/
 
 before_script: # ➜ Ajout global avant chaque job
-  - git fetch --unshallow || true # Récupère l'historique Git si nécessaire
   - ls -la # Vérifie que tous les fichiers sont bien présents
 
 build-job: # This job runs in the build stage.
   stage: build
   script:
+    - ls -la # Vérifiez les fichiers présents
     - npm install
     - npm run build
     - mv build public
