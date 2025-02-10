@@ -15,11 +15,15 @@
 # https://docs.gitlab.com/ee/development/cicd/templates.html
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+image: node:lts
 
 stages: # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
+
+before_script:
+  - npm cache clean --force # Nettoyer le cache npm avant l'installation des dépendances
 
 build-job: # This job runs in the build stage, which runs first.
   stage: build
