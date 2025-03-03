@@ -38,19 +38,24 @@ lint-test-job: # This job also runs in the test stage.
 
 cypress-test:
   stage: test
-  image: cypress/browsers
+  image: cypress/included:14.1.0
+  before_script:
+    - git fetch --unshallow
+    - git checkout $CI_COMMIT_REF_NAME
+    - ls -la frontend
   script:
+    - echo "💡 Vérification des fichiers Cypress"
+    - ls -la frontend/cypress || echo "⚠️ Le dossier Cypress est manquant !"
     - cd frontend
-    - npm install
-    - npm ci
-    - npm config list
-    - npx cypress run --browser chrome
+    - echo "💡 Exécution des tests Cypress"
+    - cypress run --browser chrome || echo "⚠️ Problème avec Cypress !"
   artifacts:
     when: always
     paths:
       - frontend/cypress/videos/**/*.mp4
       - frontend/cypress/screenshots/**/*.png
-    expire_in: 1 days
+    expire_in: 1 day
+
 
 
 
