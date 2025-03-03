@@ -38,7 +38,9 @@ lint-test-job: # This job also runs in the test stage.
 
 cypress-test:
   stage: test
-  image: cypress/included:14.1.0
+  image: 
+    name: cypress/included:14.1.0
+    entrypoint: [""]
   before_script:
     - git fetch --unshallow
     - git checkout $CI_COMMIT_REF_NAME
