@@ -49,9 +49,7 @@ cypress-test:
     - echo "💡 Vérification des fichiers Cypress"
     - ls -la frontend/cypress/e2e/cypress/e2e || echo "⚠️ Le dossier Cypress est manquant !"
     - ls -la frontend/cypress/e2e/cypress.config.js || echo "⚠️ Le fichier de config Cypress est manquant !"
-    - cd frontend
-    - npm run start &  # Démarre le serveur en arrière-plan
-    - sleep 5  # Attend quelques secondes que le serveur démarre
+    - cd  frontend
     - echo "💡 Exécution des tests Cypress"
     - cypress run --browser chrome --spec "cypress/e2e/**/*.cy.js" || echo "⚠️ Problème avec Cypress !"
   artifacts:
