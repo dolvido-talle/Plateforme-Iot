@@ -48,10 +48,10 @@ cypress-test:
   script:
     - echo "💡 Vérification des fichiers Cypress"
     - ls -la frontend/cypress/e2e/cypress/e2e || echo "⚠️ Le dossier Cypress est manquant !"
+    - ls -la frontend/cypress/e2e/cypress.config.js || echo "⚠️ Le fichier de config Cypress est manquant !"
     - cd frontend/cypress/e2e/cypress
     - echo "💡 Exécution des tests Cypress"
-    - ls -la frontend/cypress/e2e/cypress.config.js || echo "⚠️ Le fichier de config Cypress est manquant !"
-    - cypress run --browser chrome || echo "⚠️ Problème avec Cypress !"
+    - cypress run --browser chrome  || echo "⚠️ Problème avec Cypress !"
   artifacts:
     when: always
     paths:
