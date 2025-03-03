@@ -41,6 +41,7 @@ cypress-test:
   image: cypress/browsers
   script:
     - cd frontend
+    - npm install
     - npm ci
     - npm config list
     - npx cypress run --browser chrome
