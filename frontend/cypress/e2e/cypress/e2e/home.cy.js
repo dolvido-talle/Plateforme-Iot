@@ -1,0 +1,45 @@
+describe("Login Page Test", () => {
+  before(() => {
+    cy.visit("/");
+  });
+
+  it("should display the login form", () => {
+    cy.contains("h4", "Connexion").should("be.visible");
+    cy.get("input[label='Email']").should("be.visible");
+    cy.get("input[label='Mot de passe']").should("be.visible");
+    cy.get("button[type='submit']").should("be.visible");
+  });
+
+  it("should show an error message for incorrect credentials", () => {
+    cy.intercept("POST", "/api/login", {
+      statusCode: 401,
+      body: { detail: "Identifiants incorrects !" },
+    }).as("loginRequest");
+
+    cy.get("input[label='Email']").type("incorrect@example.com");
+    cy.get("input[label='Mot de passe']").type("wrongpassword");
+    cy.get("button[type='submit']").click();
+
+    cy.wait("@loginRequest");
+
+    cy.contains("Identifiants incorrects !").should("be.visible");
+  });
+
+  it("should login successfully with correct credentials", () => {
+    cy.intercept("POST", "/api/login", {
+      statusCode: 200,
+      body: {
+        access: "fakeAccessToken",
+        refresh: "fakeRefreshToken",
+      },
+    }).as("loginRequest");
+
+    cy.get("input[label='Email']").type("correct@example.com");
+    cy.get("input[label='Mot de passe']").type("correctpassword");
+    cy.get("button[type='submit']").click();
+
+    cy.wait("@loginRequest");
+
+    cy.url().should("eq", Cypress.config().baseUrl + "/");
+  });
+});
