@@ -1,6 +1,6 @@
 module.exports = {
   e2e: {
-    baseUrl: "http://localhost:3000",
+    baseUrl: "https://example.cypress.io",
     chromeWebSecurity: false,
     supportFile: false,
     video: true,
