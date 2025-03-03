@@ -36,6 +36,23 @@ lint-test-job: # This job also runs in the test stage.
     - sleep 10
     - echo "No lint issues found."
 
+cypress-test:
+  state: test
+  image: cypress/browsers
+  script:
+    - cd frontend
+    - npm ci
+    - npm config list
+    - npx cypress run --browser chrome
+  artifacts:
+    when: always
+    paths:
+      - frontend/cypress/videos/**/*.mp4
+      - frontend/cypress/screenshots/**/*.png
+    expire_in: 1 days
+
+
+
 deploy-job: # This job runs in the deploy stage.
   stage: deploy # It only runs when *both* jobs in the test stage complete successfully.
   environment: production
