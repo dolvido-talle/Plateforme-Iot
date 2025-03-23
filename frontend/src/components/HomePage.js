@@ -1,87 +1,41 @@
 import React, { useEffect, useState } from "react";
-import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
-import { useGetCategoriesQuery } from "../services/testApi";
+import { Button, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../store/slice/authSlice";
+import { useGetDevicesQuery, useLogoutMutation } from "../services/testApi";
 import LoadingBar from "./LoadingBar";
 import Popup from "./ErrorPopup";
-import { Button } from "@mui/material";
 import HelpModal from "./Modal/HelpModal";
 import ExportModal from "./Modal/ExportModal";
 
 function HomePage() {
-  const { error, isLoading } = useGetCategoriesQuery();
-  const [showError, setShowError] = useState(false);
   const [openHelpModal, setOpenHelpModal] = useState(false);
   const [openExportModal, setOpenExportModal] = useState(false);
+  const { data: devices, error, isLoading } = useGetDevicesQuery();
+  const [logout] = useLogoutMutation();
+  const navigate = useNavigate();
+  const [showError, setShowError] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (error) {
-      setShowError(true);
-    }
+    if (error) setShowError(true);
   }, [error]);
 
-  const handleCloseErrorPopup = () => {
-    setShowError(false);
-  };
+  const handleCloseErrorPopup = () => setShowError(false);
 
-  const handleOpenHelpModal = () => {
-    setOpenHelpModal(true);
-  };
-
-  const handleCloseHelpModal = () => {
-    setOpenHelpModal(false);
-  };
-
-  const handleOpenExportModal = () => {
-    setOpenExportModal(true);
-  };
-
-  const handleCloseExportModal = () => {
-    setOpenExportModal(false);
-  };
-
-  const exportCSV = () => {
-    const rows = [
-      { name: "Item 1", calories: 100, fat: 10 },
-      { name: "Item 2", calories: 200, fat: 20 },
-    ];
-
-    const headers = "name,calories,fat";
-
-    const csvData = [
-      headers,
-      ...rows.map((row) => `${row.name},${row.calories},${row.fat}`), // Ajouter les lignes de données
-    ].join("\n");
-
-    const blob = new Blob([csvData], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "data.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
-  const exportJSON = () => {
-    const rows = [
-      { name: "Item 1", calories: 100, fat: 10 },
-      { name: "Item 2", calories: 200, fat: 20 },
-      // On remplacer par les vraies données du tableau plus tard
-    ];
-    const jsonData = JSON.stringify(rows);
-    const blob = new Blob([jsonData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "data.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      dispatch(logoutUser());
+      navigate("/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion", error);
+    }
   };
 
   return (
     <div>
-      {/* Contenu principal */}
       <div className="flex justify-between items-center p-4">
         <h1 className="text-xl font-serif cursor-pointer text-blue-600 hover:text-blue-400">
           Plateforme-IoT
@@ -90,50 +44,57 @@ function HomePage() {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleOpenExportModal}
+            onClick={() => setOpenExportModal(true)}
           >
             Exporter Données
           </Button>
-
           <Button
             variant="contained"
             color="primary"
-            onClick={handleOpenHelpModal}
+            onClick={() => setOpenHelpModal(true)}
           >
             Aide
           </Button>
-
-          <Button variant="outlined" color="secondary">
+          <Button variant="outlined" color="secondary" onClick={handleLogout}>
             Déconnexion
           </Button>
         </div>
       </div>
 
-      {/* LoadingBar */}
-      {isLoading && (
-        <div className="fixed top-0 left-0 w-full z-10">
-          <LoadingBar />
-        </div>
-      )}
-
-      {/* Popup pour l'erreur */}
+      {isLoading && <LoadingBar />}
       {showError && (
         <Popup
-          message={`Erreur lors du chargement: ${error?.message}`}
+          message={`Erreur lors du chargement: ${error}`}
           onClose={handleCloseErrorPopup}
         />
       )}
 
-      {/* Modal pour Aide */}
-      <HelpModal open={openHelpModal} handleClose={handleCloseHelpModal} />
-
-      {/* Modal pour Export */}
+      <HelpModal
+        open={openHelpModal}
+        handleClose={() => setOpenHelpModal(false)}
+      />
       <ExportModal
         open={openExportModal}
-        handleClose={handleCloseExportModal}
-        exportCSV={exportCSV}
-        exportJSON={exportJSON}
+        handleClose={() => setOpenExportModal(false)}
       />
+
+      <div className="mt-6">
+        <Typography variant="h4" component="h2" gutterBottom>
+          Liste des Devices
+        </Typography>
+        {devices && devices.length > 0 ? (
+          <ul>
+            {devices.map((device) => (
+              <li key={device.id}>
+                ID: {device.device_id} - Temp: {device.temperature}°C -
+                Humidité: {device.humidity}% - Créé le: {device.date_create}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Typography variant="body1">Aucun device trouvé</Typography>
+        )}
+      </div>
     </div>
   );
 }

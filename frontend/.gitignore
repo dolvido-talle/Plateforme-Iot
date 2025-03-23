@@ -21,3 +21,37 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Environnement virtuel
+venv/
+.env/
+*.env
+
+# Caches Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers de base de données
+*.db
+# Fichiers de logs
+*.log
+
+# Fichiers d'IDE
+.vscode/
+.idea/
+
+# Dossier de tests
+.pytest_cache/
+
+# Fichiers générés par Django
+*.sqlite3
+db.sqlite3
+
+# Fichiers de couverture de test
+.coverage
+
+echo ".idea/
+backend/venv/
+backend/db.sqlite3" >> .gitignore
+git rm -r --cached .idea backend/venv backend/db.sqlite3
