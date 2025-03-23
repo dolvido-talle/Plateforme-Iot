@@ -1,5 +1,5 @@
 describe("Login Page Test", () => {
-  before(() => {
+  beforeEach(() => {
     cy.visit("/");
   });
 
