@@ -4,7 +4,8 @@ const customFetchBase = async (url, options = {}) => {
 
   try {
     if (window.Cypress) {
-      response = await fetch(`http://docker.internal.host:8000/api${url}`, {
+      // env cypress
+      response = await fetch(`http://host.docker.internal:8000/api${url}`, {
         ...options,
         headers: {
           ...options.headers,
