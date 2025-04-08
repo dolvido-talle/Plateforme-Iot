@@ -1,7 +1,6 @@
 # The Docker image that will be used to build your app
 image: node:lts
 
-
 stages: # List of stages for jobs, and their order of execution
   - build
   - test
@@ -36,7 +35,6 @@ lint-test-job: # This job also runs in the test stage.
     - sleep 10
     - echo "No lint issues found."
 
-
 deploy-job: # This job runs in the deploy stage.
   stage: deploy # It only runs when *both* jobs in the test stage complete successfully.
   environment: production
@@ -50,3 +48,50 @@ cache:
     - node_modules/
     - .npm/
 
+cypress-test:
+  stage: test
+  image:
+    name: cypress/included:14.1.0
+    entrypoint: [""]
+  before_script:
+    - git fetch --unshallow
+    - git checkout $CI_COMMIT_REF_NAME
+    - ls -la frontend/cypress/e2e/cypress/e2e
+
+  script:
+    - echo "💡 Vérification des fichiers Cypress"
+    - ls -la frontend/cypress/e2e/cypress/e2e || echo "⚠️ Le dossier Cypress est manquant !"
+    - ls -la frontend/cypress || echo "Cypress folder is missing!"
+    - cd frontend
+    - echo "recherche de l'url de l'api"
+    - grep -r "http://host.docker.internal:8000" . || echo "aucun trouvé"
+    - cat src/store/customFetchBase.js
+    # install dependencies
+    - npm ci
+    - cd ../backend
+    - apt-get update && apt-get install -y python3 python3-venv python3-pip
+    - python3 -m venv backend/venv  # Créer un environnement virtuel
+    - source backend/venv/bin/activate 
+    - pip3 install django djangorestframework django-cors-headers
+    - pip3 install drf-yasg
+    - pip install -r requirements.txt gunicorn
+    - python3 manage.py migrate
+     # Démarrer le backend Django sur le port 8000
+    - python manage.py runserver 0.0.0.0:8000 &
+    - npx wait-on http://localhost:8000 & # Attendre que l'API backend soit prêt
+    # Démarrer le frontend en arrière-plan
+    - cd ../frontend
+    #- npm install
+    # start the server in the background
+    - npm start &
+    - npx wait-on http://localhost:3000
+    # run Cypress tests
+    - cd cypress/e2e
+    - echo "execution des tests"
+    - cypress run --browser chrome
+  artifacts:
+    when: always
+    paths:
+      - frontend/cypress/e2e/cypress/videos/**/*.mp4
+      - frontend/cypress/e2e/cypress/screenshots/**/*.png
+    expire_in: 1 day

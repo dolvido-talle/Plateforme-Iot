@@ -27,11 +27,6 @@ venv/
 .env/
 *.env
 
-# Caches Python
-__pycache__/
-*.pyc
-*.pyo
-
 # Fichiers de base de données
 *.db
 # Fichiers de logs

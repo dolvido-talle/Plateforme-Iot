@@ -64,6 +64,7 @@ function login() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-80">
         <TextField
           label="Email"
+          name = "email"
           variant="outlined"
           fullWidth
           value={email}
@@ -72,6 +73,7 @@ function login() {
         />
         <TextField
           label="Mot de passe"
+          name="password"
           type="password"
           variant="outlined"
           fullWidth
