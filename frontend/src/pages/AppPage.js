@@ -5,6 +5,8 @@ import HomePage from "../components/HomePage";
 import Datatable from "../components/DataTable";
 import Login from "./login";
 import ProtectedRouteAuth from "../routes/guards/ProtectedRoutesAuth";
+import ResetPassword from "./ResetPassword";
+import ConfirmPassword from "./ConfirmPassword";
 
 function AppPage() {
   return (
@@ -13,6 +15,10 @@ function AppPage() {
         <Routes>
           {/* Route de Login */}
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Login mode="signup" />} />
+
+          <Route path="/resetpassword" element={<ResetPassword />} />
+          <Route path="/confirmpassword" element={<ConfirmPassword />} />
 
           {/* Route protégée */}
           <Route

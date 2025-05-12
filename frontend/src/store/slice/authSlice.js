@@ -12,7 +12,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.user = action.payload.user; // Si tu veux stocker des infos sur l'utilisateur
+      state.user = action.payload.user; // stocke des infos sur l'utilisateur
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;

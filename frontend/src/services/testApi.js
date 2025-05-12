@@ -34,6 +34,25 @@ export const testApi = createApi({
         }
       },
     }),
+    signUp: builder.mutation({
+      query: (data) => ({
+        url: "users/",
+        method: "POST",
+        body: data,
+        headers: { "Content-Type": "application/json" },
+      }),
+    }),
+    async onQueryStarted(args, { queryFulfilled }) {
+      try {
+        await queryFulfilled;
+      } catch (error) {
+        if (error.error?.data?.detail) {
+          console.error("Erreur d'inscription :", error.error.data.detail);
+        } else {
+          console.error("Erreur inconnue :", error);
+        }
+      }
+    },
     logout: builder.mutation({
       query: () => ({
         url: "logout/",
@@ -70,6 +89,21 @@ export const testApi = createApi({
         }
       },
     }),
+    requestPasswordReset: builder.mutation({
+      query: ({ email }) => ({
+        url: "reset-password/",
+        method: "POST",
+        body: { email },
+      }),
+    }),
+    // 2) Confirmation du code + nouveau mot de passe
+    confirmPasswordReset: builder.mutation({
+      query: ({ code, new_password }) => ({
+        url: "confirm-password/",
+        method: "POST",
+        body: { code, new_password },
+      }),
+    }),
   }),
 });
 
@@ -78,6 +112,9 @@ export const {
   useGetCategoriesQuery,
   useGetDevicesQuery,
   useLoginMutation,
+  useSignUpMutation,
   useLogoutMutation,
   useRefreshTokenMutation,
+  useRequestPasswordResetMutation,
+  useConfirmPasswordResetMutation,
 } = testApi;

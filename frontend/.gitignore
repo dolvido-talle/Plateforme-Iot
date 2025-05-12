@@ -45,7 +45,7 @@ db.sqlite3
 
 # Fichiers de couverture de test
 .coverage
-
+backend/db.sqlite3
 echo ".idea/
 backend/venv/
 backend/db.sqlite3" >> .gitignore

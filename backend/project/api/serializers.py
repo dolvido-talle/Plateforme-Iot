@@ -1,25 +1,27 @@
 from rest_framework import serializers
 from .models import User
 from .models import DeviceData
+from rest_framework.validators import UniqueValidator
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+
     class Meta:
         model = User
         fields = ['id', 'email', 'iot_id', 'password', 'username']
 
     def create(self, validated_data):
         user = User(
-            username=validated_data['username']
+            username=validated_data['username'],
+            email=validated_data['email'],
+            iot_id=validated_data.get('iot_id')
         )
-        user.set_password(validated_data['password'])  # Hash du mot de passe
+        user.set_password(validated_data['password'])
         user.save()
         return user
-
-    for user in User.objects.all():
-      if not user.password.startswith("pbkdf2_sha256$"):  # Vérifions si le mot de passe est en clair
-        user.set_password(user.password)
-        user.save()
 
 
 class AdminSerializer(serializers.ModelSerializer):

@@ -7,11 +7,18 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from http import HTTPStatus
+from django.core.mail import send_mail
+import datetime
+from rest_framework.views import APIView
+from .models import PasswordResetCode
+import random
+from django.db import IntegrityError
+from rest_framework.exceptions import ValidationError
 
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         return User.objects.all()
@@ -131,3 +138,57 @@ class DeviceDataListView(viewsets.ModelViewSet):
         return super().dispatch(request, *args, **kwargs)
     """
 
+
+reset_codes = {}
+
+
+class RequestPasswordResetView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable."}, status=HTTPStatus.NOT_FOUND)
+
+        code = f"{random.randint(100000, 999999)}"
+        reset_codes[email] = {
+            "code": code,
+            "expires_at": datetime.datetime.now() + datetime.timedelta(minutes=5)
+        }
+
+        # Enregistrer le code
+        PasswordResetCode.objects.create(user=user, code=code)
+        message = f" {email} Votre code de réinitialisation de la plateforme IoT de 3IL est : {code}. Il expire le {reset_codes[email]['expires_at']}."
+        send_mail(
+            "Votre code de réinitialisation de la plateforme IoT de 3IL",
+            message,
+            "no-reply@3il-ingenieurs.fr",
+            [email],
+        )
+
+        return Response({"Success": "Code envoyé par email", "mail": message}, status=HTTPStatus.OK)
+
+
+class ConfirmPasswordResetView(APIView):
+    """ Vue pour confirmer la réinitialisation du mot de passe. """
+
+    def post(self, request):
+        code = request.data.get("code")
+        new_password = request.data.get("new_password")
+
+        try:
+            reset_entry = PasswordResetCode.objects.get(code=code, used=False)
+        except PasswordResetCode.DoesNotExist:
+            return Response({"error": "Code invalide ou déjà utilisé."}, status=HTTPStatus.BAD_REQUEST)
+
+        if reset_entry.is_expired():
+            return Response({"error": "Code expiré."}, status=HTTPStatus.BAD_REQUEST)
+
+        user = reset_entry.user
+        user.set_password(new_password)
+        user.save()
+
+        reset_entry.used = True
+        reset_entry.save()
+
+        return Response({"success": "Mot de passe mis à jour."}, status=HTTPStatus.OK)
