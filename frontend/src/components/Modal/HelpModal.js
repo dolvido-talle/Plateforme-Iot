@@ -24,10 +24,9 @@ function HelpModal({ open, handleClose }) {
           Informations sur les données du tableau
         </Typography>
         <Typography id="modal-help-description" sx={{ mt: 2 }}>
-          Ce tableau contient des informations sur divers articles : nom,
-          calories, graisses, glucides, protéines, catégories et état du stock.
-          Ces données sont essentielles pour la gestion des stocks et la
-          visualisation des produits disponibles dans votre inventaire.
+          Ce tableau contient des informations sur divers données : température,
+          precipitations, pression, humidité.
+          Ces données sont essentielles pour la gestion de la Plateforme-IoT.
         </Typography>
         <Button
           variant="contained"

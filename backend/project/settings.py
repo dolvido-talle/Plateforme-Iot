@@ -129,6 +129,9 @@ REST_FRAMEWORK = {
     # 'PAGE_SIZE': 2,
     'DEFAULT_AUTHENTICATION_CLASSES': ('project.api.authentification.CookiesJWTAuthentication',),
     # 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',  # Permet l'accès à toutes les vues sans authentification
+    ),
 }
 
 SIMPLE_JWT = {
@@ -149,3 +152,4 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 AUTH_USER_MODEL = "api.User"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

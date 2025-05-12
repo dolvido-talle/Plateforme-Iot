@@ -10,7 +10,7 @@ from .api.views import CustomTokenObtainPairView, CustomTokenRefreshView, logout
 from rest_framework.routers import DefaultRouter
 from .api.views import UserViewSet, AdminUserViewSet, DeviceDataListView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from .api.views import RequestPasswordResetView, ConfirmPasswordResetView
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -39,6 +39,8 @@ urlpatterns = [
     path("api/login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("api/logout/", logout, name="logout"),
+    path('api/reset-password/', RequestPasswordResetView.as_view(), name='reset-password'),
+    path('api/confirm-password/', ConfirmPasswordResetView.as_view(), name='confirm-password'),
 
     # Documentation Swagger UI
     path('api/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
