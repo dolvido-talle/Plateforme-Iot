@@ -2,7 +2,6 @@ import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "../components/HomePage";
-import Datatable from "../components/DataTable";
 import Login from "./login";
 import ProtectedRouteAuth from "../routes/guards/ProtectedRoutesAuth";
 import ResetPassword from "./ResetPassword";
@@ -26,7 +25,6 @@ function AppPage() {
             element={
               <ProtectedRouteAuth>
                 <HomePage />
-                <Datatable />
               </ProtectedRouteAuth>
             }
           />

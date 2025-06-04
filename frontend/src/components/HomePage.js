@@ -8,6 +8,7 @@ import LoadingBar from "./LoadingBar";
 import Popup from "./ErrorPopup";
 import HelpModal from "./Modal/HelpModal";
 import ExportModal from "./Modal/ExportModal";
+import Datatable from "./DataTable";
 
 function HomePage() {
   const [openHelpModal, setOpenHelpModal] = useState(false);
@@ -32,6 +33,50 @@ function HomePage() {
     } catch (error) {
       console.error("Erreur lors de la déconnexion", error);
     }
+  };
+
+  const exportCSV = () => {
+    if (!devices || devices.length === 0) return;
+
+    const headers = Object.keys(devices[0]);
+
+    const escapeCSVValue = (value) => {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      // Échapper les guillemets en les doublant
+      const escaped = str.replace(/"/g, '""');
+      return `"${escaped}"`; // entoure de guillemets
+    };
+
+    const csvRows = [
+      headers.join(","), // ligne d'en-tête
+      ...devices.map((device) =>
+        headers.map((header) => escapeCSVValue(device[header])).join(",")
+      ),
+    ];
+
+    const blob = new Blob([csvRows.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "devices.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const exportJSON = () => {
+    if (!devices || devices.length === 0) return;
+
+    const json = JSON.stringify(devices, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "devices.json";
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -76,23 +121,18 @@ function HomePage() {
       <ExportModal
         open={openExportModal}
         handleClose={() => setOpenExportModal(false)}
+        exportCSV={exportCSV}
+        exportJSON={exportJSON}
       />
 
       <div className="mt-6">
         <Typography variant="h4" component="h2" gutterBottom>
-          Liste des Devices
+          Liste des Données
         </Typography>
         {devices && devices.length > 0 ? (
-          <ul>
-            {devices.map((device) => (
-              <li key={device.id}>
-                ID: {device.device_id} - Temp: {device.temperature}°C -
-                Humidité: {device.humidity}% - Créé le: {device.date_create}
-              </li>
-            ))}
-          </ul>
+          <Datatable devices={devices} />
         ) : (
-          <Typography variant="body1">Aucun device trouvé</Typography>
+          <Typography variant="body1">Aucune device trouvé</Typography>
         )}
       </div>
     </div>

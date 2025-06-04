@@ -113,6 +113,9 @@ function Login() {
         className="relative flex flex-col items-center justify-center h-full text-white px-4"
         sx={{ zIndex: 1 }}
       >
+        <Typography variant="h3" gutterBottom className="font-serif">
+           Plateforme-IoT
+        </Typography>
         <Box className="flex space-x-4 mb-6">
           <Button
             variant={mode === "login" ? "contained" : "outlined"}

@@ -11,6 +11,7 @@
     "@mui/material": "^6.4.2",
     "@reduxjs/toolkit": "^2.5.1",
     "@tailwindcss/vite": "^4.0.1",
+    "axios": "^1.9.0",
     "cra-template": "1.2.0",
     "framer-motion": "^12.4.3",
     "globals": "^15.14.0",
