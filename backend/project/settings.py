@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,9 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-6w4#i--4*l3-mn2omum8no91t27(bxdb*8&33+__5p7(yx&faa'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+# Make DEBUG configurable via environment variable so production can set DEBUG=False
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in ('true', '1')
+# Restrict allowed hosts for testing the external IP. Do not commit secrets.
+# Allowed hosts include localhost and the public IP assigned by the LoadBalancer.
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '4.251.160.5', '4.251.144.48', '4.178.187.0.nip.io']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -45,14 +49,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'project.middleware.AllowPrivateNetworkMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -147,9 +150,43 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Add frontend origins (localhost for dev and the public frontend LB IP)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://4.251.144.48",
+    "http://4.178.187.0.nip.io",
+    # add https variant if you serve frontend over TLS in production
+    "https://4.251.144.48",
+    "https://4.178.187.0.nip.io",
 ]
+
+# If using cookie-based auth or CSRF protection, trust the frontend origin as well
+CSRF_TRUSTED_ORIGINS = [
+    "http://4.251.144.48",
+    "http://localhost:3000",
+    "http://4.178.187.0.nip.io",
+    # include https if used
+    "https://4.251.144.48",
+    "https://4.178.187.0.nip.io",
+]
+
+# Security: configure cookie flags depending on DEBUG
+if not DEBUG:
+    # In production we require secure cookies and explicit SameSite=None so cookies can be
+    # sent in cross-site requests when needed. This requires HTTPS (Secure=True).
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SAMESITE = 'None'
+    # If your app is behind a proxy (nginx / load balancer) that terminates TLS, enable this
+    # so Django knows the original request scheme. Configure your proxy to set X-Forwarded-Proto.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    # Local development: more permissive cookies
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
 
 AUTH_USER_MODEL = "api.User"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

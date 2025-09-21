@@ -14,6 +14,7 @@ from .models import PasswordResetCode
 import random
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
+from django.conf import settings
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -43,13 +44,17 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             res = Response()
             res.data = {"success": True}
 
+            # Déterminer secure et samesite en fonction du mode DEBUG
+            secure_flag = not settings.DEBUG  # True en production, False en développement
+            samesite_value = "None" if secure_flag else "Lax"
+
             # Stockage des tokens dans des cookies sécurisés
             res.set_cookie(
                 key="access_token",
                 value=tokens["access"],
                 httponly=True,
-                secure=True,  # À désactiver si en local (mettre False)
-                samesite="None",
+                secure=secure_flag,
+                samesite=samesite_value,
                 path="/",
             )
 
@@ -57,8 +62,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 key="refresh_token",
                 value=tokens["refresh"],
                 httponly=True,
-                secure=False,  # À désactiver si en local (mettre False)
-                samesite="None",
+                secure=secure_flag,
+                samesite=samesite_value,
                 path="/",
             )
 
@@ -84,13 +89,16 @@ class CustomTokenRefreshView(TokenRefreshView):
             res = Response()
             res.data = {"refreshed": True}
 
+            secure_flag = not settings.DEBUG
+            samesite_value = "None" if secure_flag else "Lax"
+
             # Mise à jour du cookie avec le nouveau token d'accès
             res.set_cookie(
                 key="access_token",
                 value=response.data["access"],
                 httponly=True,
-                secure=False,  # À désactiver si en local (mettre False)
-                samesite="None",
+                secure=secure_flag,
+                samesite=samesite_value,
                 path="/",
             )
             return res

@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: my-backend-app
+    container_name: my-backend-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DJANGO_DEBUG=false
+    networks:
+      - iotnet
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_URL: "http://4.251.160.5:8000/api/"
+    image: my-frontend-app
+    container_name: my-frontend-app
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://4.251.160.5:8000/api/
+    networks:
+      - iotnet
+
+networks:
+  iotnet:
+    driver: bridge
